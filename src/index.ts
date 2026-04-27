@@ -17,6 +17,7 @@ const {
   ANTHROPIC_API_KEY,
   SYNC_TAGS = "",
   PORT = "3000",
+  API_KEY = "",
 } = process.env;
 
 if (!PAPERLESS_URL || !PAPERLESS_TOKEN || !COUCHDB_URL || !COUCHDB_USER || !COUCHDB_PASSWORD) {
@@ -55,7 +56,7 @@ async function forceResync(): Promise<void> {
   sync();
 }
 
-startServer(parseInt(PORT), forceResync);
+startServer(parseInt(PORT), API_KEY, forceResync, (path, content) => livesync.writeFile(path, content));
 
 await sync();
 setInterval(sync, intervalMs);
