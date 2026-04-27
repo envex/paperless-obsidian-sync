@@ -1,20 +1,36 @@
 import { PaperlessClient } from "./paperless.ts";
 import { LiveSyncWriter } from "./livesync.ts";
 import { cleanupContent } from "./cleanup.ts";
+import { log } from "./logger.ts";
 
 function sanitizePath(name: string): string {
   return name.replace(/[/\\:*?"<>|]/g, "-").trim();
 }
 
-export async function runSync(paperless: PaperlessClient, livesync: LiveSyncWriter): Promise<void> {
-  console.log(`[${new Date().toISOString()}] Starting sync...`);
+export async function runSync(
+  paperless: PaperlessClient,
+  livesync: LiveSyncWriter,
+  syncTags: string[] = []
+): Promise<void> {
+  log(`[${new Date().toISOString()}] Starting sync...`);
+  if (syncTags.length > 0) log(`  Tag filter: ${syncTags.join(", ")}`);
 
   const [tags, lastSync] = await Promise.all([paperless.getTags(), livesync.getLastSync()]);
 
-  if (lastSync) console.log(`  Last sync: ${lastSync.toISOString()}`);
+  if (lastSync) log(`  Last sync: ${lastSync.toISOString()}`);
 
-  const documents = await paperless.getDocuments(lastSync ?? undefined);
-  console.log(`  Documents to sync: ${documents.length}`);
+  const allDocuments = await paperless.getDocuments(lastSync ?? undefined);
+
+  let documents = allDocuments;
+  if (syncTags.length > 0) {
+    const normalised = syncTags.map((t) => t.toLowerCase());
+    const filterIds = new Set(
+      [...tags.entries()].filter(([, name]) => normalised.includes(name.toLowerCase())).map(([id]) => id)
+    );
+    documents = allDocuments.filter((doc) => doc.tags.some((id) => filterIds.has(id)));
+  }
+
+  log(`  Documents to sync: ${documents.length}${syncTags.length > 0 ? ` (of ${allDocuments.length} total)` : ""}`);
 
   let synced = 0;
   let failed = 0;
@@ -31,11 +47,11 @@ export async function runSync(paperless: PaperlessClient, livesync: LiveSyncWrit
       await livesync.writeFile(obsidianPath, content);
       synced++;
     } catch (err) {
-      console.error(`  Failed to sync doc ${doc.id} "${doc.title}":`, err);
+      log(`  Failed to sync doc ${doc.id} "${doc.title}": ${err}`);
       failed++;
     }
   }
 
   await livesync.setLastSync(new Date());
-  console.log(`  Done. Synced: ${synced}, Failed: ${failed}`);
+  log(`  Done. Synced: ${synced}, Failed: ${failed}`);
 }

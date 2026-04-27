@@ -64,6 +64,16 @@ export class LiveSyncWriter {
     return doc ? new Date(doc.lastSync) : null;
   }
 
+  async clearLastSync(): Promise<void> {
+    const existing = await this.getDoc<SyncState>("_local/paperless-sync");
+    if (!existing?._rev) return;
+    const res = await fetch(
+      `${this.dbUrl}/${encodeURIComponent("_local/paperless-sync")}?rev=${existing._rev}`,
+      { method: "DELETE", headers: { Authorization: this.authHeader } }
+    );
+    if (!res.ok) throw new Error(`CouchDB DELETE failed: ${res.status}`);
+  }
+
   async setLastSync(date: Date): Promise<void> {
     const existing = await this.getDoc<SyncState>("_local/paperless-sync");
     const doc: SyncState = {

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc",
-    "dev": "tsx watch src/index.ts"
+    "dev": "node --env-file=.env --import tsx/esm --watch src/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.0",
