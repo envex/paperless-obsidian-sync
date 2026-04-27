@@ -53,5 +53,9 @@ export async function runSync(
   }
 
   await livesync.setLastSync(new Date());
-  log(`  Done. Synced: ${synced}, Failed: ${failed}`);
+  log(`  Synced: ${synced}`);
+
+  if (failed > 0) {
+    log(`  Failed: ${failed}`);
+  }
 }

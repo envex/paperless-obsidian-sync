@@ -35,7 +35,7 @@ function html(): string {
       el.className = 'leading-5 ' + (
         /failed|error/i.test(text) ? 'text-red-400' :
         /starting sync/i.test(text) ? 'text-blue-400 pt-2 first:pt-0' :
-        /done\\./i.test(text) ? 'text-green-400' :
+        /synced/i.test(text) ? 'text-green-400' :
         /ai ocr|cleanup|enabled/i.test(text) ? 'text-yellow-400' :
         'text-gray-400'
       );
@@ -54,7 +54,7 @@ function html(): string {
       const line = JSON.parse(e.data);
       addLine(line);
       if (/starting sync/i.test(line)) setStatus('syncing', 'bg-blue-900 text-blue-300');
-      if (/done\\./i.test(line)) { setStatus('idle', 'bg-gray-800 text-gray-400'); syncing = false; btn.disabled = false; btn.textContent = 'Force Resync'; }
+      if (/synced/i.test(line)) { setStatus('idle', 'bg-gray-800 text-gray-400'); syncing = false; btn.disabled = false; btn.textContent = 'Force Resync'; }
     };
     es.onerror = () => setStatus('disconnected', 'bg-red-900 text-red-300');
 

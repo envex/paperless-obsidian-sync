@@ -24,6 +24,8 @@ interface SyncState {
   lastSync: string;
 }
 
+const DOC = "_local/paperless-sync";
+
 export class LiveSyncWriter {
   private authHeader: string;
   private dbUrl: string;
@@ -60,24 +62,24 @@ export class LiveSyncWriter {
   }
 
   async getLastSync(): Promise<Date | null> {
-    const doc = await this.getDoc<SyncState>("_local/paperless-sync");
+    const doc = await this.getDoc<SyncState>(DOC);
     return doc ? new Date(doc.lastSync) : null;
   }
 
   async clearLastSync(): Promise<void> {
-    const existing = await this.getDoc<SyncState>("_local/paperless-sync");
+    const existing = await this.getDoc<SyncState>(DOC);
     if (!existing?._rev) return;
     const res = await fetch(
-      `${this.dbUrl}/${encodeURIComponent("_local/paperless-sync")}?rev=${existing._rev}`,
+      `${this.dbUrl}/${encodeURIComponent(DOC)}?rev=${existing._rev}`,
       { method: "DELETE", headers: { Authorization: this.authHeader } }
     );
     if (!res.ok) throw new Error(`CouchDB DELETE failed: ${res.status}`);
   }
 
   async setLastSync(date: Date): Promise<void> {
-    const existing = await this.getDoc<SyncState>("_local/paperless-sync");
+    const existing = await this.getDoc<SyncState>(DOC);
     const doc: SyncState = {
-      _id: "_local/paperless-sync",
+      _id: DOC,
       lastSync: date.toISOString(),
     };
     if (existing?._rev) doc._rev = existing._rev;
