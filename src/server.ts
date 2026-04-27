@@ -365,7 +365,7 @@ export function startServer(
       res.writeHead(202);
       res.end();
     } else if (req.method === "POST" && req.url === "/write") {
-      if (req.headers.authorization !== `Bearer ${apiKey}`) {
+      if (req.headers.authorization !== `Bearer ${apiKey.trim()}`) {
         res.writeHead(401, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Unauthorized" }));
         return;
