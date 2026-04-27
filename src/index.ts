@@ -56,6 +56,7 @@ async function forceResync(): Promise<void> {
   sync();
 }
 
+console.log(`[startup] API_KEY set: ${!!API_KEY}, length: ${API_KEY.length}`);
 startServer(parseInt(PORT), API_KEY, forceResync, (path, content) => livesync.writeFile(path, content));
 
 await sync();
