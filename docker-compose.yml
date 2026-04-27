@@ -1,0 +1,13 @@
+services:
+  paperless-sync:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PAPERLESS_URL=${PAPERLESS_URL}
+      - PAPERLESS_TOKEN=${PAPERLESS_TOKEN}
+      - COUCHDB_URL=${COUCHDB_URL}
+      - COUCHDB_DB=${COUCHDB_DB:-obsidian}
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+      - SYNC_INTERVAL_MINUTES=${SYNC_INTERVAL_MINUTES:-60}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
