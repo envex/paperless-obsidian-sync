@@ -14,5 +14,8 @@
     "@types/node": "^22",
     "tsx": "^4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }
