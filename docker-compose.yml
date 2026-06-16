@@ -2,6 +2,8 @@ services:
   paperless-sync:
     build: .
     restart: unless-stopped
+    extra_hosts:
+      - "host-gateway:host-gateway"
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     environment:
