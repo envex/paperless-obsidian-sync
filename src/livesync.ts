@@ -61,6 +61,17 @@ export class LiveSyncWriter {
     await this.putDoc(fileDoc);
   }
 
+  async ensureDatabase(): Promise<void> {
+    const res = await fetch(this.dbUrl, {
+      method: "PUT",
+      headers: { Authorization: this.authHeader },
+    });
+    // 412 = database already exists, which is fine
+    if (!res.ok && res.status !== 412) {
+      throw new Error(`Failed to create CouchDB database: ${res.status}`);
+    }
+  }
+
   async getLastSync(): Promise<Date | null> {
     const doc = await this.getDoc<SyncState>(DOC);
     return doc ? new Date(doc.lastSync) : null;

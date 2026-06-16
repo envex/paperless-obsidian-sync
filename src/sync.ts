@@ -15,6 +15,8 @@ export async function runSync(
   log(`[${new Date().toISOString()}] Starting sync...`);
   if (syncTags.length > 0) log(`  Tag filter: ${syncTags.join(", ")}`);
 
+  await livesync.ensureDatabase();
+
   const [tags, lastSync] = await Promise.all([paperless.getTags(), livesync.getLastSync()]);
 
   if (lastSync) log(`  Last sync: ${lastSync.toISOString()}`);
