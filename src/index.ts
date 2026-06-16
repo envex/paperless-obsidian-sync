@@ -45,6 +45,8 @@ async function sync(): Promise<void> {
   syncing = true;
   try {
     await runSync(paperless, livesync, syncTags);
+  } catch (err) {
+    log(`Sync error: ${err}`);
   } finally {
     syncing = false;
   }
@@ -56,7 +58,23 @@ async function forceResync(): Promise<void> {
   sync();
 }
 
+async function waitForCouchDB(): Promise<void> {
+  const auth = `Basic ${Buffer.from(`${COUCHDB_USER}:${COUCHDB_PASSWORD}`).toString("base64")}`;
+  const base = COUCHDB_URL!.replace(/\/$/, "");
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const res = await fetch(base, { headers: { Authorization: auth } });
+      if (res.ok) return;
+    } catch {
+      // not ready
+    }
+    log(`Waiting for CouchDB... (attempt ${attempt})`);
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+}
+
 startServer(parseInt(PORT), API_KEY, forceResync, (path, content) => livesync.writeFile(path, content));
 
+await waitForCouchDB();
 await sync();
 setInterval(sync, intervalMs);
